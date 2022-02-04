@@ -1,8 +1,0 @@
-2022-02-03 14:42:27,466 - nest_to_tvb_send229 - INFO - Thread Internal : read buffer
-2022-02-03 14:42:27,466 - nest_to_tvb_send229 - INFO - Thread Internal : end Thread init
-2022-02-03 14:42:27,467 - nest_to_tvb_send229 - INFO - MPI IO ext : end MPI extern init
-2022-02-03 14:42:27,469 - nest_to_tvb_send229 - INFO - MPI IO ext : run : create connection
-2022-02-03 14:42:27,469 - nest_to_tvb_send229 - INFO - MPI IO ext : create connection : Translate Receive: before open_port
-2022-02-03 14:42:27,469 - nest_to_tvb_send229 - INFO - MPI IO ext : create connection : Translate nest_to_tvb_send229: after open_port: tag#1$description#ubuntu-focal$port#55011$ifname#127.0.1.1$
-2022-02-03 14:42:27,470 - nest_to_tvb_send229 - INFO - MPI IO ext : create connection : Translate nest_to_tvb_send229: path_file: nest_elephant_tvb/launcher/../../result_sim/co-simulation//transformation/send_to_tvb/0.txt
-2022-02-03 14:42:27,470 - nest_to_tvb_send229 - INFO - MPI IO ext : create connection : Wait for Translate : tag#1$description#ubuntu-focal$port#55011$ifname#127.0.1.1$

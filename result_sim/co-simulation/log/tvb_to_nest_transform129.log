@@ -1,8 +1,0 @@
-2022-02-03 14:42:27,514 - tvb_to_nest_transform129 - INFO - Thread Internal : read buffer
-2022-02-03 14:42:27,514 - tvb_to_nest_transform129 - INFO - Thread Internal : write buffer
-2022-02-03 14:42:27,514 - tvb_to_nest_transform129 - INFO - Thread Internal : end Thread init
-2022-02-03 14:42:27,514 - tvb_to_nest_transform129 - INFO - MPI IO ext : end MPI extern init
-2022-02-03 14:42:27,514 - tvb_to_nest_transform129 - INFO - TRS : end init transformation
-2022-02-03 14:42:27,536 - tvb_to_nest_transform129 - INFO - TRS : get rate
-2022-02-03 14:42:27,536 - tvb_to_nest_transform129 - INFO - Thread Internal : rate(get) : get time rate
-2022-02-03 14:42:27,536 - tvb_to_nest_transform129 - INFO - Thread Internal : read(ready) : buffer wait -2.0
