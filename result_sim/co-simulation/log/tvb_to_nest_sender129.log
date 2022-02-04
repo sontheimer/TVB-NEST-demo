@@ -1,0 +1,16 @@
+2022-02-03 14:42:27,515 - tvb_to_nest_sender129 - INFO - Thread Internal : read buffer
+2022-02-03 14:42:27,515 - tvb_to_nest_sender129 - INFO - Thread Internal : end Thread init
+2022-02-03 14:42:27,515 - tvb_to_nest_sender129 - INFO - MPI IO ext : end MPI extern init
+2022-02-03 14:42:27,515 - tvb_to_nest_sender129 - INFO - Produce Nest : end init
+2022-02-03 14:42:27,541 - tvb_to_nest_sender129 - INFO - MPI IO ext : run : create connection
+2022-02-03 14:42:27,541 - tvb_to_nest_sender129 - INFO - MPI IO ext : create connection : Translate Receive: before open_port
+2022-02-03 14:42:27,541 - tvb_to_nest_sender129 - INFO - MPI IO ext : create connection : Translate tvb_to_nest_sender129: after open_port: tag#1$description#ubuntu-focal$port#47907$ifname#127.0.1.1$
+2022-02-03 14:42:27,587 - tvb_to_nest_sender129 - INFO - MPI IO ext : create connection : Translate tvb_to_nest_sender129: path_file: nest_elephant_tvb/launcher/../../result_sim/co-simulation//transformation/spike_generator/228.txt
+2022-02-03 14:42:27,588 - tvb_to_nest_sender129 - INFO - MPI IO ext : create connection : Wait for Translate : tag#1$description#ubuntu-focal$port#47907$ifname#127.0.1.1$
+2022-02-03 14:42:28,268 - tvb_to_nest_sender129 - INFO - MPI IO ext : create connection : Connection accepted
+2022-02-03 14:42:28,269 - tvb_to_nest_sender129 - INFO - Produce Nest : simulation
+2022-02-03 14:42:28,269 - tvb_to_nest_sender129 - INFO - Produce Nest : loop start : wait all
+2022-02-03 14:42:28,289 - tvb_to_nest_sender129 - INFO - Produce Nest : Get check : status : 0
+2022-02-03 14:42:28,290 - tvb_to_nest_sender129 - INFO - Produce Nest : start to send 
+2022-02-03 14:42:28,290 - tvb_to_nest_sender129 - INFO - Thread Internal : spike(get) : begin 
+2022-02-03 14:42:28,290 - tvb_to_nest_sender129 - INFO - Thread Internal : read(ready) : buffer wait [-2]

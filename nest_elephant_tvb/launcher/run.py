@@ -101,10 +101,10 @@ def run_nest_to_tvb(mpirun, path, logger):
     :param logger: logger of the launcher
     :return:
     """
-    dir_path = os.path.dirname(os.path.realpath(__file__)) + "/../transformation/nest_to_tvb.py"
+    dir_path = os.path.dirname(os.path.realpath(__file__)) + "/../transformation/app_interscalehub.py"
     argv = copy.copy(mpirun)
-    argv += ['-n', '1', 'python3', dir_path]
-    argv += [path]
+    argv += ['-n', '2', 'python3', dir_path]
+    argv += [1,path]
     logger.info("Transformer NEST to TVB start : " + str(argv))
     return subprocess.Popen(argv,
                             # need to check if it's needed or not (doesn't work for me)
@@ -120,10 +120,10 @@ def run_tvb_to_nest(mpirun, path, logger):
     :param logger: logger of the launcher
     :return:
     """
-    dir_path = os.path.dirname(os.path.realpath(__file__)) + "/../transformation/tvb_to_nest.py"
+    dir_path = os.path.dirname(os.path.realpath(__file__)) + "/../transformation/app_interscalehub.py"
     argv = copy.copy(mpirun)
-    argv += ['-n', '1', 'python3', dir_path]
-    argv += [path]
+    argv += ['-n', '2', 'python3', dir_path]
+    argv += [2, path]
     logger.info("Translator TVB to NEST start : " + str(argv))
     return subprocess.Popen(argv,
                             # need to check if it's needed or not (doesn't work for me)

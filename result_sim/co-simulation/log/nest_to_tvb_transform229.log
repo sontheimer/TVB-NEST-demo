@@ -1,0 +1,20 @@
+2022-02-03 14:42:27,466 - nest_to_tvb_transform229 - INFO - Thread Internal : read buffer
+2022-02-03 14:42:27,466 - nest_to_tvb_transform229 - INFO - Thread Internal : write buffer
+2022-02-03 14:42:27,466 - nest_to_tvb_transform229 - INFO - Thread Internal : end Thread init
+2022-02-03 14:42:27,466 - nest_to_tvb_transform229 - INFO - MPI IO ext : end MPI extern init
+2022-02-03 14:42:27,467 - nest_to_tvb_transform229 - INFO - TRS : begin sim
+2022-02-03 14:42:27,467 - nest_to_tvb_transform229 - INFO - TRS : init rates
+2022-02-03 14:42:27,467 - nest_to_tvb_transform229 - INFO - Thread Internal : rate(send) : begin
+2022-02-03 14:42:27,467 - nest_to_tvb_transform229 - INFO - Thread Internal : write(ready) : wait -2.0
+2022-02-03 14:42:27,467 - nest_to_tvb_transform229 - INFO - Thread Internal : write(ready) : end wait [0]
+2022-02-03 14:42:27,467 - nest_to_tvb_transform229 - INFO - Thread Internal : rate(send) : buffer
+2022-02-03 14:42:27,468 - nest_to_tvb_transform229 - INFO - Thread Internal : rate(send) : time :[0.  1.2]
+2022-02-03 14:42:27,468 - nest_to_tvb_transform229 - INFO - Thread Internal : rate(send) : buffer :(2, 11)
+2022-02-03 14:42:27,468 - nest_to_tvb_transform229 - INFO - Thread Internal : rate(send) : data write
+2022-02-03 14:42:27,468 - nest_to_tvb_transform229 - INFO - Thread Internal : write(end) : begin
+2022-02-03 14:42:27,468 - nest_to_tvb_transform229 - INFO - Thread Internal : write(end) : end
+2022-02-03 14:42:27,468 - nest_to_tvb_transform229 - INFO - Thread Internal : rate(send) : end
+2022-02-03 14:42:27,468 - nest_to_tvb_transform229 - INFO - TRS : send init
+2022-02-03 14:42:27,468 - nest_to_tvb_transform229 - INFO - TSR : receive data Nest
+2022-02-03 14:42:27,468 - nest_to_tvb_transform229 - INFO - Thread Internal : spike(ready) : ready get spikes
+2022-02-03 14:42:27,468 - nest_to_tvb_transform229 - INFO - Thread Internal : read(ready) : buffer wait [-2]

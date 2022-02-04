@@ -1,0 +1,6 @@
+2022-02-03 14:42:23,169 - launcher - INFO - time: 2022-02-03 14:42:23.169516 BEGIN SIMULATION 
+
+2022-02-03 14:42:23,170 - launcher - INFO - NEST start :['mpirun', '-n', '2', 'python3', '/home/vagrant/multiscale-cosim-repos/TVB-NEST-demo/nest_elephant_tvb/launcher/../nest/Balanced_network_reduce_co-sim.py', 'nest_elephant_tvb/launcher/../../result_sim/co-simulation//parameter.json']
+2022-02-03 14:42:23,172 - launcher - INFO - Transformer NEST to TVB start : ['mpirun', '-n', '1', 'python3', '/home/vagrant/multiscale-cosim-repos/TVB-NEST-demo/nest_elephant_tvb/launcher/../transformation/nest_to_tvb.py', 'nest_elephant_tvb/launcher/../../result_sim/co-simulation/']
+2022-02-03 14:42:23,174 - launcher - INFO - Translator TVB to NEST start : ['mpirun', '-n', '1', 'python3', '/home/vagrant/multiscale-cosim-repos/TVB-NEST-demo/nest_elephant_tvb/launcher/../transformation/tvb_to_nest.py', 'nest_elephant_tvb/launcher/../../result_sim/co-simulation/']
+2022-02-03 14:42:23,179 - launcher - INFO - TVB start :['mpirun', '-n', '1', 'python3', '/home/vagrant/multiscale-cosim-repos/TVB-NEST-demo/nest_elephant_tvb/launcher/../tvb/TVB_simple_example_co_sim.py', 'nest_elephant_tvb/launcher/../../result_sim/co-simulation//parameter.json']
