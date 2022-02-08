@@ -17,6 +17,7 @@ from Interscale_hub.InterscaleHub import InterscaleHub
 from Interscale_hub.parameter import Parameter
 
 def run_wrapper(direction, path):
+# def run_wrapper(path):
     # print(f'****************input from pipe:{input()}')
     # direction
     # 1 --> nest to Tvb
@@ -24,6 +25,7 @@ def run_wrapper(direction, path):
     param = Parameter()
 
     direction = int(direction) # NOTE: will be changed
+    # direction = 1 # NOTE: will be changed
     # receive steering commands init,start,stop
     
     # 1) init InterscaleHUB

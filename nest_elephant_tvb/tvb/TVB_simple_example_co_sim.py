@@ -66,8 +66,10 @@ def run_example(co_simulation, path, time_synch=0.1, simtime=1000.0, level_log=1
 
     logger.info("start the simulation")
     if not co_simulation:
+        print('\nINFO ===> DEBUG 1')
         (RAW,) = simulator.run()
     else:
+        print('\nINFO ===> DEBUG 2')
         (RAW,) = Wrapper.run_mpi(simulator, path, logger)
 
     logger.info("plot the result")

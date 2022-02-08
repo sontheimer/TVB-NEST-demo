@@ -42,7 +42,7 @@ def configure(simulator, co_simulation, nb_neurons=10000):
     if co_simulation:
         input_to_simulator = simulator.Create("spike_generator", nb_neurons,
                                               params={'stimulus_source': 'mpi',
-                                                      'label': '../transformation/spike_generator'})
+                                                      'label': '/../transformation/spike_generator'})
         output_from_simulator = simulator.Create("spike_recorder",
                                                  params={"record_to": "mpi",
                                                          'label': '/../transformation/spike_detector'})
@@ -82,11 +82,13 @@ def run_example(co_simulation, path, time_synch=0.1, simtime=1000.0, level_log=1
     if not co_simulation:
         nest.Simulate(simtime)
     else:
-        wait_transformation_modules(nest, path, input_to_simulator, output_from_simulator, logger)
+        wait_transformation_modules(nest, path, input_to_simulator, output_from_simulator, logger)   
         count = 0.0
         nest.Prepare()
+        logger.info("connections are made") 
         while count * time_synch < simtime:
             nest.Run(time_synch)
+            logger.info("count is now: " + str(count))
             count += 1
         nest.Cleanup()
 

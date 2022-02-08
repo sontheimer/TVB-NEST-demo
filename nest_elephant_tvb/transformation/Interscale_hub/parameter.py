@@ -11,6 +11,8 @@
 #       Team: Multi-scale Simulation and Design
 #
 # ------------------------------------------------------------------------------
+import os
+
 
 class Parameter:
     '''
@@ -31,7 +33,7 @@ class Parameter:
         path_file = os.path.dirname(__file__)
         self.__parameter = {
                 "co_simulation": True,
-                "path": path_file + "/../../result_sim/co-simulation/",
+                "path": path_file + "/../../../result_sim/co-simulation/",
                 "simulation_time": 1000.0,
                 "level_log": 1,
                 "resolution": 0.1,
@@ -43,24 +45,28 @@ class Parameter:
                 "nb_brain_synapses": 1,
                 'id_first_neurons': [1],
                 "save_spikes": True,
-                "save_rate": True
+                "save_rate": True,
+                "width": 20.0,
+                "id_first_spike_detector": 229
         }
         # path to files containing the MPI port info
-        self.__nest_file = '../tests/test_nest_tvb/nest.txt' 
-        self.__tvb_file = '../tests/test_nest_tvb/tvb.txt'
+        # NOTE these files contain the ids of spike detector(s) and spike generators
+        self.__nest_to_tvb_port_file = "/home/vagrant/multiscale-cosim-repos/TVB-NEST-demo/result_sim/co-simulation/nest/spike_detector.txt"
+        self.__tvb_to_nest_port_file = "/home/vagrant/multiscale-cosim-repos/TVB-NEST-demo/result_sim/co-simulation/nest/spike_generator.txt"
         
-    def get_nest_path(self):
-        return self.__nest_file
+    def get_nest_to_tvb_port(self):
+        return self.__nest_to_tvb_port_file
     
-    def get_tvb_path(self):
-        return self.__tvb_file
+    def get_tvb_to_nest_port(self):
+        return self.__tvb_to_nest_port_file
     
     def get_param(self,direction):
         # direction:
         # 1 --> NEST to TVB
         # 2 --> TVB to NEST
-        if direction == 1:
-            param = self.__parameter['param_nest_to_tvb']
-        elif direction == 2:
-            param = self.__parameter['param_tvb_to_nest']
-        return param
+        # if direction == 1:
+        #     param = self.__parameter['param_nest_to_tvb']
+        # elif direction == 2:
+        #     param = self.__parameter['param_tvb_to_nest']
+        # return param
+        return self.__parameter

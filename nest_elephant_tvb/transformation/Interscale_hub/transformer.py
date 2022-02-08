@@ -21,6 +21,7 @@ import numpy as np
 import copy
 # science related imports
 from Interscale_hub.science import rates_to_spikes
+from elephant.spike_train_generation import inhomogeneous_poisson_process
 from quantities import ms,Hz
 
 ############
@@ -45,7 +46,7 @@ class store_data:
         :param path : path for the logger files
         :param param : parameters for the object
         """
-        self.synch=param['synch']                # time of synchronization between 2 run
+        self.synch=param['time_synchronization']                # time of synchronization between 2 run
         self.dt=param['resolution']              # the resolution of the integrator
         self.shape = (int(self.synch/self.dt),1) # the shape of the buffer/histogram
         self.hist = np.zeros(self.shape)         # the initialisation of the histogram
@@ -78,7 +79,7 @@ class analyse_data:
         """
 
         self.width = int(param['width']/param['resolution']) # the window of the average in time
-        self.synch = param['synch']                          # synchronize time between simulator
+        self.synch = param['time_synchronization']     # synchronize time between simulator
         self.buffer = np.zeros((self.width,))                  #initialisation/ previous result for a good result
         self.coeff = 1 / ( param['nb_neurons'] * param['resolution'] ) # for the mean firing rate in in KHZ
         
@@ -121,47 +122,72 @@ class generate_data:
         :param path : path for the logger files
         :param nb_spike_generator: number of spike generator/neurons in each regions
         """
-        self.percentage_shared = param['percentage_shared']  # percentage of shared rate between neurons
-        self.nb_spike_generator = param['nb_spike_generator']         # number of spike generator
-        self.nb_synapse = param['nb_synapses']               # number of synapses by neurons
-        self.function_translation = param['function_select'] # choose the function for the translation
-        np.random.seed(param['seed'])
+        # self.percentage_shared = param['percentage_shared']  # percentage of shared rate between neurons
+        # self.nb_spike_generator = param['nb_spike_generator']         # number of spike generator
+        # self.nb_synapse = param['nb_brain_synapses']               # number of synapses by neurons
+        # self.function_translation = param['function_select'] # choose the function for the translation
+        # np.random.seed(param['seed'])
+
+        self.id = id_transformer
+        self.nb_spike_generator = nb_spike_generator  # number of spike generator
+        self.path = param['path'] + "/transformation/"
+        # variable for saving values:
+        self.save_spike = bool(param['save_spikes'])
+        if self.save_spike:
+            self.save_spike_buf = None
+        self.save_rate = bool(param['save_rate'])
+        if self.save_rate:
+            self.save_rate_buf = None
+        self.logger.info('TRS : end init transformation')
+        self.nb_synapse = param["nb_brain_synapses"]
         
     def generate_spike(self,count,time_step,rate):
-        """
-        generate spike
-        This function are based on the paper : Kuhn, Alexandre, Ad Aertsen, and Stefan Rotter. “Higher-Order Statistics of Input Ensembles and the Response of Simple Model Neurons.” Neural Computation 15, no. 1 (January 2003): 67–101. https://doi.org/10.1162/089976603321043702.
-        DOI: 10.1162/089976603321043702
-        function 1 : Single Interaction Process Model
-        function 2 : Multiple Interaction Process Model
-        :param count: the number of step of synchronization between simulators
-        :param time_step: the time of synchronization
-        :param rate: the input rate of the mean field
-        :return:
-        """
-        if self.function_translation == 1:
-            # Single Interaction Process Model
-            # Compute the rate to spike trains
-            rate *= self.nb_synapse # rate of poisson generator ( due property of poisson process)
-            rate += 1e-12 # avoid rate equals to zeros
-            spike_shared = \
-                rates_to_spikes(rate * self.percentage_shared * Hz,
-                                time_step[0] * ms, time_step[1] * ms, variation=True)[0]
-            spike_generate = rates_to_spikes(np.repeat([rate],self.nb_spike_generator,axis=0) * (1 - self.percentage_shared) * Hz, time_step[0] * ms, time_step[1] * ms,
-                                    variation=True)
-            for i in range(self.nb_spike_generator):
-                spike_generate[i] = np.around(np.sort(np.concatenate((spike_generate, spike_shared))), decimals=1)
-            #self.logger.info('rate :'+str(rate)+' spikes :'+str(np.concatenate(spike_generate).shape))
-            return spike_generate
-        elif self.function_translation == 2:
-            # Multiple Interaction Process Model
-            rate *= self.nb_synapse / self.percentage_shared # rate of poisson generator ( due property of poisson process)
-            rate += 1e-12  # avoid rate equals to zeros
-            spike_shared = np.round(rates_to_spikes(rate * Hz, time_step[0] * ms, time_step[1] * ms, variation=True)[0],1)
-            select = np.random.binomial(n=1,p=self.percentage_shared,size=(self.nb_spike_generator,spike_shared.shape[0]))
-            result = []
-            for i in np.repeat([spike_shared],self.nb_spike_generator,axis=0)*select :
-                result.append(i[np.where(i!=0)])
-            #self.logger.info('rate :'+str(rate)+' spikes :'+str(spike_shared))
-            return result
+        rate *= self.nb_synapse  # rate of poisson generator ( due property of poisson process)
+        rate += 1e-12
+        rate = np.abs(rate)  # avoid rate equals to zeros
+        signal = AnalogSignal(rate * Hz, t_start=(time_step[0] + 0.1) * ms,
+                              sampling_period=(time_step[1] - time_step[0]) / rate.shape[-1] * ms)
+        spike_generate = []
+        for i in range(self.nb_spike_generator):
+            # generate individual spike trains
+            spike_generate.append(np.around(np.sort(inhomogeneous_poisson_process(signal, as_array=True)), decimals=1))
+        return spike_generate
+       
+       
+        # """
+        # generate spike
+        # This function are based on the paper : Kuhn, Alexandre, Ad Aertsen, and Stefan Rotter. “Higher-Order Statistics of Input Ensembles and the Response of Simple Model Neurons.” Neural Computation 15, no. 1 (January 2003): 67–101. https://doi.org/10.1162/089976603321043702.
+        # DOI: 10.1162/089976603321043702
+        # function 1 : Single Interaction Process Model
+        # function 2 : Multiple Interaction Process Model
+        # :param count: the number of step of synchronization between simulators
+        # :param time_step: the time of synchronization
+        # :param rate: the input rate of the mean field
+        # :return:
+        # """
+        # if self.function_translation == 1:
+        #     # Single Interaction Process Model
+        #     # Compute the rate to spike trains
+        #     rate *= self.nb_synapse # rate of poisson generator ( due property of poisson process)
+        #     rate += 1e-12 # avoid rate equals to zeros
+        #     spike_shared = \
+        #         rates_to_spikes(rate * self.percentage_shared * Hz,
+        #                         time_step[0] * ms, time_step[1] * ms, variation=True)[0]
+        #     spike_generate = rates_to_spikes(np.repeat([rate],self.nb_spike_generator,axis=0) * (1 - self.percentage_shared) * Hz, time_step[0] * ms, time_step[1] * ms,
+        #                             variation=True)
+        #     for i in range(self.nb_spike_generator):
+        #         spike_generate[i] = np.around(np.sort(np.concatenate((spike_generate, spike_shared))), decimals=1)
+        #     #self.logger.info('rate :'+str(rate)+' spikes :'+str(np.concatenate(spike_generate).shape))
+        #     return spike_generate
+        # elif self.function_translation == 2:
+        #     # Multiple Interaction Process Model
+        #     rate *= self.nb_synapse / self.percentage_shared # rate of poisson generator ( due property of poisson process)
+        #     rate += 1e-12  # avoid rate equals to zeros
+        #     spike_shared = np.round(rates_to_spikes(rate * Hz, time_step[0] * ms, time_step[1] * ms, variation=True)[0],1)
+        #     select = np.random.binomial(n=1,p=self.percentage_shared,size=(self.nb_spike_generator,spike_shared.shape[0]))
+        #     result = []
+        #     for i in np.repeat([spike_shared],self.nb_spike_generator,axis=0)*select :
+        #         result.append(i[np.where(i!=0)])
+        #     #self.logger.info('rate :'+str(rate)+' spikes :'+str(spike_shared))
+        #     return result
     

@@ -37,14 +37,16 @@ def run(parameters):
     mpirun = ['mpirun']  # example : ['mpirun'] , ['srun','-N','1']
 
     processes = []  # process generate for the co-simulation
+    
+    # run NEST in co-simulation
     processes.append(run_nest(mpirun, parameters['path'] + '/parameter.json', logger))
-
+    
     # create transformer between Nest to TVB :
     processes.append(run_nest_to_tvb(mpirun, parameters['path'], logger))
 
     # create transformer between TVB to Nest:
     processes.append(run_tvb_to_nest(mpirun, parameters['path'], logger))
-
+    
     # Run TVB in co-simulation
     processes.append(run_tvb(mpirun, parameters['path'] + '/parameter.json', logger))
 
@@ -146,7 +148,7 @@ def save_parameter(parameters):
 if __name__ == "__main__":
     parameter_default = {"co_simulation": False,
                          "path": "",
-                         "simulation_time": 1000.0,
+                         "simulation_time": 100.0,
                          "level_log": 1,
                          "resolution": 0.1,
                          "nb_neurons": [100]

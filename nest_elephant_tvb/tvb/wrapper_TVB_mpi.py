@@ -22,8 +22,11 @@ def run_mpi(simulator, path, logger):
     nb_monitor = len(simulator.monitors)
     id_proxy = simulator.proxy_inds
 
+    # path = "/home/vagrant/multiscale-cosim-repos/TVB-NEST-demo/result_sim/co-simulation"
     path_send = path + "/transformation/send_to_tvb/"
     path_receive = path + "/transformation/receive_from_tvb/"
+    # path_send = "/home/vagrant/multiscale-cosim-repos/TVB-NEST-demo/result_sim/co-simulation/transformation/send_to_tvb/"
+    # path_receive = "/home/vagrant/multiscale-cosim-repos/TVB-NEST-demo/result_sim/co-simulation//transformation/receive_from_tvb/"
 
     # initialise the variable for the saving the result
     save_result = []
@@ -188,6 +191,7 @@ def end_mpi(comm, path, sending, logger):
     :param logger: logger of the module
     :return: nothing
     """
+    # path = "/home/vagrant/multiscale-cosim-repos/TVB-NEST-demo/result_sim/co-simulation"
     # read the port before the deleted file
     fport = open(path, "r")
     port = fport.readline()

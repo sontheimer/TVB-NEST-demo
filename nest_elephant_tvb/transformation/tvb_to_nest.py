@@ -22,6 +22,7 @@ if __name__ == "__main__":
 
     # Parse arguments
     path = sys.argv[1]  # path of the simulation
+    
     id_transformer = 0  # index of the transformer
 
     # take the parameters and instantiate objects
