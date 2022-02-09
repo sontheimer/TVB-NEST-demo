@@ -124,12 +124,15 @@ class generate_data:
         """
         # self.percentage_shared = param['percentage_shared']  # percentage of shared rate between neurons
         # self.nb_spike_generator = param['nb_spike_generator']         # number of spike generator
+        self.nb_spike_generator = param['nb_neurons']         # number of spike generator
         # self.nb_synapse = param['nb_brain_synapses']               # number of synapses by neurons
         # self.function_translation = param['function_select'] # choose the function for the translation
         # np.random.seed(param['seed'])
-
-        self.id = id_transformer
-        self.nb_spike_generator = nb_spike_generator  # number of spike generator
+        
+        # id_transformer = 0  # TODO check if it is correct
+        # self.id = id_transformer  # TODO check if it is needed
+        
+        # self.nb_spike_generator = nb_spike_generator  # number of spike generator
         self.path = param['path'] + "/transformation/"
         # variable for saving values:
         self.save_spike = bool(param['save_spikes'])
@@ -138,7 +141,7 @@ class generate_data:
         self.save_rate = bool(param['save_rate'])
         if self.save_rate:
             self.save_rate_buf = None
-        self.logger.info('TRS : end init transformation')
+        # self.logger.info('TRS : end init transformation')
         self.nb_synapse = param["nb_brain_synapses"]
         
     def generate_spike(self,count,time_step,rate):

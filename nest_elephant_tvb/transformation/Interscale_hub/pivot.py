@@ -104,6 +104,7 @@ class NestTvbPivot:
             # IF all ranks send always the same tag in one iteration (simulation step)
             # then this works. But it should be handled differently!!!!
             self.__comm_receiver.Recv([check, 1, MPI.CXX_BOOL], source=0, tag=MPI.ANY_TAG, status=status_)
+            
             status_rank_0 = status_.Get_tag()
             for i in range(1, self.__num_sending):
                 # new: We do not care which source sends first, give MPI the freedom to send in whichever order.
@@ -126,8 +127,8 @@ class NestTvbPivot:
                     self.__logger.info("DEBUG 121 ====> receiving size in NEST_TVB_PIVOT")
                     #############################
                     # NOTE upper left arrow hangs here
-                    # self.__comm_receiver.Recv([shape, 1, MPI.INT], source=source, tag=0, status=status_)
-                    self.__comm_receiver.Recv([shape, 1, MPI.INT], source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=status_)
+                    self.__comm_receiver.Recv([shape, 1, MPI.INT], source=source, tag=0, status=status_)
+                    # self.__comm_receiver.Recv([shape, 1, MPI.INT], source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=status_)
                     # NEW: receive directly into the buffer
                     self.__logger.info("DEBUG 126 ====> receiving package")
                     self.__comm_receiver.Recv([self.__databuffer[head_:], MPI.DOUBLE], source=source, tag=0, status=status_)
@@ -255,9 +256,11 @@ class TvbNestPivot:
         MVP: receive on rank 0, do the rest on rank 1.
         '''
         if intracomm.Get_rank() == 0: # Receiver from input sim, rank 0
-            self._receive()
-        else: #  Science/analyse and sender to TVB, rank 1-x
+            # self._receive()
             self._send()
+        else: #  Science/analyse and sender to TVB, rank 1-x
+            # self._send()
+            self._receive()
 
 
     def stop(self):
@@ -294,7 +297,7 @@ class TvbNestPivot:
             # NEW: receive directly into the buffer
             self.__logger.info("receiving data")
             # self.__comm_receiver.Recv([self.__databuffer[0:], MPI.DOUBLE], source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=status_)
-            self.__comm_receiver.Recv([self.__databuffer[0:], MPI.DOUBLE], source=0, tag=MPI.ANY_TAG, status=status_)
+            self.__comm_receiver.Recv([self.__databuffer[0:], MPI.DOUBLE], source=0, tag=0, status=status_)
             if status_.Get_tag() == 0:
                 # wait until ready to receive new data (i.e. the sender has cleared the buffer)
                 while self.__databuffer[-1] != 1: # TODO: use MPI, remove the sleep

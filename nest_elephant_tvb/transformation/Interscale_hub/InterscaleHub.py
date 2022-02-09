@@ -147,17 +147,20 @@ class InterscaleHub:
             - input = incoming simulation data
             - output = outgoing simulation data
         '''
-        if direction == 1:
-            self.__input_comm, self.__input_port = self.__ic.open_port_accept_connection(self.__input_path)
-            self.__output_comm, self.__output_port = self.__ic.open_port_accept_connection(self.__output_path)
-        elif direction == 2:
-            self.__output_comm, self.__output_port = self.__ic.open_port_accept_connection(self.__output_path)
-            self.__input_comm, self.__input_port = self.__ic.open_port_accept_connection(self.__input_path)
+        # NEST-to-TVB
+        if self.__direction == 1:
+                self.__input_comm, self.__input_port = self.__ic.open_port_accept_connection(self.__input_path)
+                self.__output_comm, self.__output_port = self.__ic.open_port_accept_connection(self.__output_path)
+
+        # TVB-to-NEST
+        elif self.__direction == 2: 
+                self.__output_comm, self.__output_port = self.__ic.open_port_accept_connection(self.__output_path)
+                self.__input_comm, self.__input_port = self.__ic.open_port_accept_connection(self.__input_path)
     
     def get_ids_of_nodes_to_be_connected(self, path, direction):
         
         id_transformer = 0
-        if direction  == 1:    
+        if self.__direction  == 1:    
             # get information from NEST
             while not os.path.exists(path + 'nest/spike_detector.txt.unlock'):
                 # self.__logger.info("DEBUG==>1 PATH: " + path)
@@ -176,7 +179,7 @@ class InterscaleHub:
             # id_spike_detector = os.path.splitext(os.path.basename(path + file_spike_detector))[0]
             return path_to_spike_detector
 
-        elif direction == 2:
+        elif self.__direction == 2:
             while not os.path.exists(path + 'nest/spike_generator.txt.unlock'):
                 # self.__logger.info("DEBUG==>2 PATH: " + path)
                 self.__logger.info("spike generator ids not found yet, retry in 1 second")

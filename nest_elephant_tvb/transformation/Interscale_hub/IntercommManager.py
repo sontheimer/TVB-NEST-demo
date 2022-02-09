@@ -14,6 +14,7 @@
 
 from mpi4py import MPI
 import logging
+import sys
 import pathlib
 
 class IntercommManager:
@@ -33,6 +34,11 @@ class IntercommManager:
         
         # TODO: logger placeholder for testing
         self.__logger = logging.getLogger(__name__)
+        handler = logging.StreamHandler(sys.stdout)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        self.__logger.addHandler(handler)
+        self.__logger.setLevel(logging.DEBUG)
     
     def open_port_accept_connection(self, paths):
         '''
@@ -57,8 +63,8 @@ class IntercommManager:
                 fport.write(port)
                 fport.close()
                 pathlib.Path(path + '.unlock').touch()
-                self.__logger.info("Port opened and file created:", path,
-                            "on rank",self.__comm.Get_rank())
+                # self.__logger.info("Port opened and file created:" + path +
+                #             "on rank" + str(self.__comm.Get_rank()))
         else:
             port = None
         port = self.__comm.bcast(port, self.__root) # avoid issues with mpi rank information.
