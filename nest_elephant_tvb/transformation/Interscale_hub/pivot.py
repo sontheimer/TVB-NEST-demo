@@ -305,7 +305,7 @@ class TvbNestPivot:
             # we receive from "ANY_SOURCE", but only check the status_ of the last receive...
             # get the starting and ending time of the simulation step
             # NEW: receive directly into the buffer
-            self.__logger.info("receiving data")
+            self.__logger.info("receiving times")
             # self.__comm_receiver.Recv([self.__databuffer[0:], MPI.DOUBLE], source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=status_)
             self.__comm_receiver.Recv([self.__databuffer[0:], MPI.DOUBLE], source=0, tag=0, status=status_)
             if status_.Get_tag() == 0:
@@ -318,7 +318,7 @@ class TvbNestPivot:
                 self.__comm_receiver.Recv([size, 1, MPI.INT], source=status_.Get_source(), tag=0, status=status_)
                 # NEW: receive directly into the buffer
                 # First two entries are the times, see above
-                self.__logger.info("receiving times")
+                self.__logger.info("receiving rate data")
                 self.__comm_receiver.Recv([self.__databuffer[2:], MPI.DOUBLE], source=status_.Get_source(), tag=0, status=status_)
                 # Mark as 'ready to do analysis'
                 self.__databuffer[-1] = 0
@@ -375,7 +375,7 @@ class TvbNestPivot:
                 # Send to status_.Get_source() and rank
                 # why?
                 # a second status_ object is used, should not be named the same
-                for rank in range(self.__num_sending):
+                for rank in range(self.__num_receiving):
                     # NOTE: hardcoded 10 in simulation mocks
                     self.__logger.info("receiving size")
                     self.__comm_sender.Recv([size_list, 1, MPI.INT], source=rank, tag=0, status=status_)
@@ -425,9 +425,9 @@ class TvbNestPivot:
         # time_step are the first two doubles in the buffer
         # rate is a double array, which size is stored in the second to last index
         
-        self.__logger.info("TVBtoNESTPivot -- transform -- buffer content:"+str(self.__databuffer[2:int(self.__databuffer[-2])]))
+        self.__logger.info("TVBtoNESTPivot -- transform -- buffer content:"+str(self.__databuffer[2:]))
         spikes_times = generator.generate_spike(0,
                                                 self.__databuffer[:2],
-                                                self.__databuffer[2:int(self.__databuffer[-2])])
+                                                self.__databuffer[2:])
         
         return spikes_times
