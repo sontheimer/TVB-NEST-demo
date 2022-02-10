@@ -90,12 +90,14 @@ class InterscaleHub:
         # TODO: use enums
         if self.__direction == 1:
             self.__pivot = piv.NestTvbPivot(
+                self.__comm,
                 self.__param,
                 self.__input_comm, 
                 self.__output_comm, 
                 self.__databuffer)
         elif self.__direction == 2:
             self.__pivot = piv.TvbNestPivot(
+                self.__comm,
                 self.__param, 
                 self.__input_comm, 
                 self.__output_comm, 
@@ -149,13 +151,21 @@ class InterscaleHub:
         '''
         # NEST-to-TVB
         if self.__direction == 1:
-                self.__input_comm, self.__input_port = self.__ic.open_port_accept_connection(self.__input_path)
-                self.__output_comm, self.__output_port = self.__ic.open_port_accept_connection(self.__output_path)
+                if self.__comm.Get_rank() == 0:
+                    self.__input_comm, self.__input_port = self.__ic.open_port_accept_connection(self.__input_path)
+                    self.__output_comm = None
+                else:
+                    self.__output_comm, self.__output_port = self.__ic.open_port_accept_connection(self.__output_path)
+                    self.__input_comm = None
 
         # TVB-to-NEST
-        elif self.__direction == 2: 
-                self.__output_comm, self.__output_port = self.__ic.open_port_accept_connection(self.__output_path)
-                self.__input_comm, self.__input_port = self.__ic.open_port_accept_connection(self.__input_path)
+        elif self.__direction == 2:
+                if self.__comm.Get_rank() == 0:
+                    self.__output_comm, self.__output_port = self.__ic.open_port_accept_connection(self.__output_path)
+                    self.__input_comm = None
+                else:
+                    self.__input_comm, self.__input_port = self.__ic.open_port_accept_connection(self.__input_path)
+                    self.__output_comm = None
     
     def get_ids_of_nodes_to_be_connected(self, path, direction):
         

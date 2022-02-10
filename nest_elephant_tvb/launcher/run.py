@@ -103,7 +103,7 @@ def run_nest_to_tvb(mpirun, path, logger):
     """
     dir_path = os.path.dirname(os.path.realpath(__file__)) + "/../transformation/nest_to_tvb.py"
     argv = copy.copy(mpirun)
-    argv += ['-n', '1', 'python3', dir_path]
+    argv += ['-n', '3', 'python3', dir_path]
     argv += [path]
     logger.info("Transformer NEST to TVB start : " + str(argv))
     return subprocess.Popen(argv,
@@ -122,7 +122,7 @@ def run_tvb_to_nest(mpirun, path, logger):
     """
     dir_path = os.path.dirname(os.path.realpath(__file__)) + "/../transformation/tvb_to_nest.py"
     argv = copy.copy(mpirun)
-    argv += ['-n', '1', 'python3', dir_path]
+    argv += ['-n', '3', 'python3', dir_path]
     argv += [path]
     logger.info("Translator TVB to NEST start : " + str(argv))
     return subprocess.Popen(argv,

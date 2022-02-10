@@ -23,6 +23,7 @@ import copy
 from Interscale_hub.science import rates_to_spikes
 from elephant.spike_train_generation import inhomogeneous_poisson_process
 from quantities import ms,Hz
+from neo.core import SpikeTrain, AnalogSignal
 
 ############
 # Transformation and Science for NEST-TVB direction
@@ -142,16 +143,21 @@ class generate_data:
         if self.save_rate:
             self.save_rate_buf = None
         # self.logger.info('TRS : end init transformation')
-        self.nb_synapse = param["nb_brain_synapses"]
+        self.nb_synapse = int(param["nb_brain_synapses"])
         
     def generate_spike(self,count,time_step,rate):
+        #if time_step[0] == -1e5:
+        #    self.get_time_rate_exit = True
+        #    self.logger.info("MPI Internal : rate(get) : times"+str(self.sender_rank))
+        #    return times, None
         rate *= self.nb_synapse  # rate of poisson generator ( due property of poisson process)
         rate += 1e-12
         rate = np.abs(rate)  # avoid rate equals to zeros
         signal = AnalogSignal(rate * Hz, t_start=(time_step[0] + 0.1) * ms,
                               sampling_period=(time_step[1] - time_step[0]) / rate.shape[-1] * ms)
         spike_generate = []
-        for i in range(self.nb_spike_generator):
+        print("rate:",rate,"\nsignal:",signal,"\ntime step:",time_step)
+        for i in range(self.nb_spike_generator[0]):
             # generate individual spike trains
             spike_generate.append(np.around(np.sort(inhomogeneous_poisson_process(signal, as_array=True)), decimals=1))
         return spike_generate

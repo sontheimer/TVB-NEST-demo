@@ -17,6 +17,7 @@ class ProducerTVBData(MPICommunicationExtern):
         Produce data to TVB from receiving data
         """
         self.logger.info("Produce TVB Data : init ")
+        self.logger.info("ProducerTVBData -- I am rank:"+str(self.port_comms[0].Get_rank()))
         status_ = MPI.Status()
         while True:
             self.logger.info("Produce TVB Data : start loop : wait TVB")
@@ -70,6 +71,7 @@ class ConsumerTVBData(MPICommunicationExtern):
         Consumer data from TVB and transfer them to the translation function.
         """
         self.logger.info("Consumer TVB Data : start")
+        self.logger.info("ConsumerTVBData -- I am rank:"+str(self.port_comms[0].Get_rank()))
         status_ = MPI.Status()
         while True:
             self.logger.info("Consumer TVB Data : start loop : wait all")

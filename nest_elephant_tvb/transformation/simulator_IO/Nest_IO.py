@@ -16,6 +16,7 @@ class ConsumerNestData(MPICommunicationExtern):
         Receive data from Nest and add them in a shared buffer.
         """
         self.logger.info("Consumer Nest : simulation time")
+        self.logger.info("ConsumerNestData -- I am rank: "+ str(self.port_comms[0].Get_rank()))
         status_ = MPI.Status()
         num_sending = self.port_comms[0].Get_remote_size()  # The total number of the rank in Nest MPI_COMM_WORLD
         check = np.empty(1, dtype='b')  # variable to get the state of Nest
@@ -92,6 +93,7 @@ class ProducerDataNest(MPICommunicationExtern):
         Send data to Nest from a shared buffer
         """
         self.logger.info('Produce Nest : simulation')
+        self.logger.info("ProducerNestData -- I am rank: "+ str(self.port_comms[0].Get_rank()))
         # initialisation variable before the loop
         status_ = MPI.Status()
         source_sending = np.arange(0, self.port_comms[0].Get_remote_size(), 1)  # list of all the rank of Nest MPI_COMM_WORLD

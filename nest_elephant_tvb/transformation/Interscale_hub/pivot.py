@@ -36,7 +36,7 @@ from Interscale_hub.transformer import generate_data
 # TODO: rework on the receive and send loops (both, general coding style and usecase specifics)
 
 class NestTvbPivot:
-    def __init__(self, param, comm_receiver, comm_sender, databuffer):
+    def __init__(self, intracomm, param, comm_receiver, comm_sender, databuffer):
         '''
         '''
         
@@ -51,11 +51,16 @@ class NestTvbPivot:
         # Parameter for transformation and analysis
         self.__param = param
         # INTERcommunicator
-        self.__comm_receiver = comm_receiver
-        self.__comm_sender = comm_sender
+        if intracomm.Get_rank() == 0:
+            self.__logger.info("NESTtoTVB -- receiver communicator Rank:"+str(comm_receiver.Get_rank()))
+            self.__comm_receiver = comm_receiver
+            self.__num_sending = self.__comm_receiver.Get_remote_size()
+        else:
+            self.__logger.info("NESTtoTVB -- sender communicator Rank:"+str(comm_sender.Get_rank()))
+            self.__comm_sender = comm_sender
+            self.__num_receiving = self.__comm_sender.Get_remote_size()
+
         # How many Nest ranks are sending, how many Tvb ranks are receiving
-        self.__num_sending = self.__comm_receiver.Get_remote_size()
-        self.__num_receiving = self.__comm_sender.Get_remote_size()
         self.__databuffer = databuffer
     
     
@@ -98,6 +103,7 @@ class NestTvbPivot:
         count = 0
         status_ = MPI.Status()
         self.__logger.info("reading from buffer")
+        self.__logger.info("NESTtoTVB -- consumer/receiver -- Rank:"+str(self.__comm_receiver.Get_rank()))
         while True:
             head_ = 0 # head of the buffer, reset after each iteration            
             # TODO: This is still not correct. We only check for the Tag of the last rank.
@@ -155,6 +161,7 @@ class NestTvbPivot:
         '''
         count=0 # simulation/iteration step
         status_ = MPI.Status()
+        self.__logger.info("NESTtoTVB -- producer/sender -- Rank:"+str(self.__comm_sender.Get_rank()))
         while True:
             # TODO: this communication has the 'rank 0' problem described in the beginning
             accept = False
@@ -224,7 +231,7 @@ class NestTvbPivot:
 
 
 class TvbNestPivot: 
-    def __init__(self, param, comm_receiver, comm_sender, databuffer):
+    def __init__(self, intracomm, param, comm_receiver, comm_sender, databuffer):
         '''
         '''
         
@@ -240,11 +247,13 @@ class TvbNestPivot:
         # Parameter for transformation and analysis
         self.__param = param
         # INTERcommunicator
-        self.__comm_receiver = comm_receiver
-        self.__comm_sender = comm_sender
+        if intracomm.Get_rank() == 1:
+            self.__comm_receiver = comm_receiver
+            self.__num_sending = self.__comm_receiver.Get_remote_size()
+        else:    
+            self.__comm_sender = comm_sender
+            self.__num_receiving = self.__comm_sender.Get_remote_size()
         # How many TVB ranks are sending, how many NEST ranks are receiving
-        self.__num_sending = self.__comm_receiver.Get_remote_size()
-        self.__num_receiving = self.__comm_sender.Get_remote_size()
         self.__databuffer = databuffer
 
 
@@ -256,10 +265,10 @@ class TvbNestPivot:
         MVP: receive on rank 0, do the rest on rank 1.
         '''
         if intracomm.Get_rank() == 0: # Receiver from input sim, rank 0
-            # self._receive()
+            #self._receive()
             self._send()
         else: #  Science/analyse and sender to TVB, rank 1-x
-            # self._send()
+            #self._send()
             self._receive()
 
 
@@ -284,6 +293,7 @@ class TvbNestPivot:
         # init placeholder for incoming data
         size = np.empty(1, dtype='i') # size of the rate-array
         status_ = MPI.Status()
+        self.__logger.info("TVBtoNEST -- consumer/receiver -- Rank:"+str(self.__comm_receiver.Get_rank()))
         while True:
             # NOTE: Check communication protocol between simulators and transformers!
             requests=[]
@@ -336,6 +346,7 @@ class TvbNestPivot:
         size_list = np.empty(1, dtype='i')
         id_first_spike_detector = self.__param['id_first_spike_detector']
         self.__logger.info("starting sending in TVB NEST PIVOT")
+        self.__logger.info("TVBtoNEST -- producer/sender -- Rank:"+str(self.__comm_sender.Get_rank()))
         while True:
             # TODO: This is still not correct. We only check for the Tag of the last rank.
             # IF all ranks send always the same tag in one iteration (simulation step)
@@ -413,6 +424,8 @@ class TvbNestPivot:
         # NOTE: count is a hardcoded '0'. Why?
         # time_step are the first two doubles in the buffer
         # rate is a double array, which size is stored in the second to last index
+        
+        self.__logger.info("TVBtoNESTPivot -- transform -- buffer content:"+str(self.__databuffer[2:int(self.__databuffer[-2])]))
         spikes_times = generator.generate_spike(0,
                                                 self.__databuffer[:2],
                                                 self.__databuffer[2:int(self.__databuffer[-2])])
