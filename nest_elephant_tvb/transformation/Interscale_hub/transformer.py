@@ -24,6 +24,8 @@ from Interscale_hub.science import rates_to_spikes
 from elephant.spike_train_generation import inhomogeneous_poisson_process
 from quantities import ms,Hz
 from neo.core import SpikeTrain, AnalogSignal
+from elephant.statistics import instantaneous_rate
+from elephant.kernels import RectangularKernel
 
 ############
 # Transformation and Science for NEST-TVB direction
@@ -97,6 +99,59 @@ class analyse_data:
         times = np.array([count*self.synch,(count+1)*self.synch], dtype='d')
         #self.logger.info(np.mean(data*self.coeff))
         return times,data*self.coeff
+
+
+class spiketorate:
+
+    def __init__(self,param):
+        self.id = 0
+        self.time_synch = param['time_synchronization']  # time of synchronization between 2 run
+        self.dt = param['resolution']  # the resolution of the integrator
+        self.nb_neurons = param['nb_neurons'][0]
+        self.first_id = 0
+
+
+    def spike_to_rate(self, count, size_buffer, buffer_of_spikes):
+        """
+        function for the transformation of the spike trains to rate
+        :param count: counter of the number of time of the transformation (identify the timing of the simulation)
+        :param size_buffer: size of the data in the buffer
+        :param buffer_of_spikes: buffer contains spikes
+        :return: rate for the interval
+        """
+        spikes_neurons = self._reshape_buffer_from_nest(count, size_buffer, buffer_of_spikes)
+        rates = instantaneous_rate(spikes_neurons,
+                                   t_start=np.around(count * self.time_synch, decimals=2) * ms,
+                                   t_stop=np.around((count + 1) * self.time_synch, decimals=2) * ms,
+                                   sampling_period=(self.dt - 0.000001) * ms, kernel=RectangularKernel(1.0 * ms))
+        rate = np.mean(rates, axis=1) / 10  # the division by 10 ia an adaptation for the model of TVB
+        times = np.array([count * self.time_synch, (count + 1) * self.time_synch], dtype='d')
+        return times, rate
+
+    def _reshape_buffer_from_nest(self, count, size_buffer, buffer):
+        """
+        get the spike time from the buffer and order them by neurons
+        :param count: counter of the number of time of the transformation (identify the timing of the simulation)
+        :param size_buffer: size of the data in the buffer
+        :param buffer: buffer contains id of devices, id of neurons and spike times
+        :return:
+        """
+        spikes_neurons = [[] for i in range(self.nb_neurons)]
+        # get all the time of the spike and add them in a histogram
+        for index_data in range(int(np.rint(size_buffer / 3))):
+            id_neurons = int(buffer[index_data * 3 + 1])
+            time_step = buffer[index_data * 3 + 2]
+            spikes_neurons[id_neurons - self.first_id].append(time_step)
+        for i in range(self.nb_neurons):
+            if len(spikes_neurons[i]) != 0:
+                spikes_neurons[i] = SpikeTrain(np.concatenate(spikes_neurons[i]) * ms,
+                                               t_start=np.around(count * self.time_synch, decimals=2),
+                                               t_stop=np.around((count + 1) * self.time_synch, decimals=2) + 0.0001)
+            else:
+                spikes_neurons[i] = SpikeTrain(spikes_neurons[i] * ms,
+                                               t_start=np.around(count * self.time_synch, decimals=2),
+                                               t_stop=np.around((count + 1) * self.time_synch, decimals=2))
+        return spikes_neurons
 
 
 ############

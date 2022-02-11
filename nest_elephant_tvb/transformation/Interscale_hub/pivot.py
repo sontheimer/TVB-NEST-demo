@@ -19,7 +19,7 @@ import logging
 import sys
 
 #nest to tvb
-from Interscale_hub.transformer import store_data, analyse_data
+from Interscale_hub.transformer import store_data, analyse_data, spiketorate
 #tvb to nest
 from Interscale_hub.transformer import generate_data
 
@@ -213,6 +213,13 @@ class NestTvbPivot:
         '''
         #store: Python object, create the histogram 
         #analyse: Python object, calculate rates
+        self.__logger.info("NESTtoTVBPivot -- transform -- buffer head:"+str(self.__databuffer[-2]))
+        spikerate = spiketorate(self.__param)
+        self.__logger.info("NESTtoTVBPivot -- transform -- start spike_to_rate transform")
+        times, data = spikerate.spike_to_rate(count, self.__databuffer[-2], self.__databuffer)
+        self.__logger.info("NESTtoTVBPivot -- transform -- end spike_to_rate transform -- times:"+ str(times)+"-- rates:"+str(data))
+
+        '''
         store = store_data(self.__param)
         analyse = analyse_data(self.__param)
         
@@ -220,12 +227,13 @@ class NestTvbPivot:
         # Make this parallel with the INTRA communicator (should be embarrassingly parallel).
         # Step 1) take all data from buffer and create histogram
         # second to last index in databuffer denotes how much data there is
+        self.__logger.info("NESTtoTVBPivot -- transform -- buffer head:"+str(self.__databuffer[-2]))
         store.add_spikes(count, self.__databuffer[:int(self.__databuffer[-2])])
         # Step 2) take the resulting histogram
         data_to_analyse = store.return_data()
         # Step 3) Analyse this data, i.e. calculate rates?
         times,data = analyse.analyse(count, data_to_analyse)
-        
+        '''
         return times, data
     
 
@@ -424,10 +432,14 @@ class TvbNestPivot:
         # NOTE: count is a hardcoded '0'. Why?
         # time_step are the first two doubles in the buffer
         # rate is a double array, which size is stored in the second to last index
-        
-        self.__logger.info("TVBtoNESTPivot -- transform -- buffer content:"+str(self.__databuffer[2:]))
-        spikes_times = generator.generate_spike(0,
+        if int(self.__databuffer[-2]) == 0:
+            self.__logger.info("TVBtoNESTPivot -- transform -- buffer content:"+str(self.__databuffer[2:]))
+            spikes_times = generator.generate_spike(0,
                                                 self.__databuffer[:2],
                                                 self.__databuffer[2:])
-        
+        else:
+            self.__logger.info("TVBtoNESTPivot -- transform -- buffer content:"+str(self.__databuffer[2:int(self.__databuffer[-2])]))
+            spikes_times = generator.generate_spike(0,
+                                                self.__databuffer[:2],
+                                                self.__databuffer[2:int(self.__databuffer[-2])])
         return spikes_times
