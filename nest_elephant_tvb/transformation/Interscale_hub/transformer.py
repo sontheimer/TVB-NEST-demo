@@ -19,6 +19,9 @@
 
 import numpy as np
 import copy
+
+import logging
+import sys
 # science related imports
 from Interscale_hub.science import rates_to_spikes
 from elephant.spike_train_generation import inhomogeneous_poisson_process
@@ -104,11 +107,18 @@ class analyse_data:
 class spiketorate:
 
     def __init__(self,param):
+        self.__logger = logging.getLogger("transformer--spiketorate")
+        handler = logging.StreamHandler(sys.stdout)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        self.__logger.addHandler(handler)
+        self.__logger.setLevel(logging.DEBUG)
         self.id = 0
         self.time_synch = param['time_synchronization']  # time of synchronization between 2 run
         self.dt = param['resolution']  # the resolution of the integrator
         self.nb_neurons = param['nb_neurons'][0]
-        self.first_id = 0
+        # self.first_id = 0
+        self.first_id = param['id_first_neurons'][0]  # id of transformer is hardcoded to 0
 
 
     def spike_to_rate(self, count, size_buffer, buffer_of_spikes):
@@ -143,14 +153,21 @@ class spiketorate:
             time_step = buffer[index_data * 3 + 2]
             spikes_neurons[id_neurons - self.first_id].append(time_step)
         for i in range(self.nb_neurons):
-            if len(spikes_neurons[i]) != 0:
+            if len(spikes_neurons[i]) > 1:
+                # self.__logger.info("transformer -- spikestorate -- reshape buffer -- spikes neurons -- if case: " +str (spikes_neurons[i]))
+               
                 spikes_neurons[i] = SpikeTrain(np.concatenate(spikes_neurons[i]) * ms,
                                                t_start=np.around(count * self.time_synch, decimals=2),
                                                t_stop=np.around((count + 1) * self.time_synch, decimals=2) + 0.0001)
+                                               
+            
             else:
+                # self.__logger.info("transformer -- spikestorate -- reshape buffer -- t_start -- if case: " +str (t_start))
+                # self.__logger.info("transformer -- spikestorate -- reshape buffer -- spikes neurons -- if case: " +str (t_stop))
+                # self.__logger.info("transformer -- spikestorate -- reshape buffer -- spikes neurons -- else case: " +str (spikes_neurons[i]))
                 spikes_neurons[i] = SpikeTrain(spikes_neurons[i] * ms,
                                                t_start=np.around(count * self.time_synch, decimals=2),
-                                               t_stop=np.around((count + 1) * self.time_synch, decimals=2))
+                                               t_stop=np.around((count + 1) * self.time_synch, decimals=2) + 0.0001)
         return spikes_neurons
 
 
@@ -178,6 +195,13 @@ class generate_data:
         :param path : path for the logger files
         :param nb_spike_generator: number of spike generator/neurons in each regions
         """
+        self.__logger = logging.getLogger("transformer--generate_data")
+        handler = logging.StreamHandler(sys.stdout)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        self.__logger.addHandler(handler)
+        self.__logger.setLevel(logging.DEBUG)
+
         # self.percentage_shared = param['percentage_shared']  # percentage of shared rate between neurons
         # self.nb_spike_generator = param['nb_spike_generator']         # number of spike generator
         self.nb_spike_generator = param['nb_neurons']         # number of spike generator
