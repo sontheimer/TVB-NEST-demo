@@ -82,7 +82,7 @@ class analyse_data:
         self.width = int(param['width']/param['resolution']) # the window of the average in time
         self.synch = param['time_synchronization']     # synchronize time between simulator
         self.buffer = np.zeros((self.width,))                  #initialisation/ previous result for a good result
-        self.coeff = 1 / ( param['nb_neurons'] * param['resolution'] ) # for the mean firing rate in in KHZ
+        self.coeff = 1 / ( param['nb_neurons'][0] * param['resolution'] ) # for the mean firing rate in in KHZ
         
     def analyse(self,count,hist):
         """
