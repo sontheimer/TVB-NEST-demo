@@ -154,17 +154,12 @@ class spiketorate:
             spikes_neurons[id_neurons - self.first_id].append(time_step)
         for i in range(self.nb_neurons):
             if len(spikes_neurons[i]) > 1:
-                # self.__logger.info("transformer -- spikestorate -- reshape buffer -- spikes neurons -- if case: " +str (spikes_neurons[i]))
-               
                 spikes_neurons[i] = SpikeTrain(np.concatenate(spikes_neurons[i]) * ms,
                                                t_start=np.around(count * self.time_synch, decimals=2),
                                                t_stop=np.around((count + 1) * self.time_synch, decimals=2) + 0.0001)
                                                
             
             else:
-                # self.__logger.info("transformer -- spikestorate -- reshape buffer -- t_start -- if case: " +str (t_start))
-                # self.__logger.info("transformer -- spikestorate -- reshape buffer -- spikes neurons -- if case: " +str (t_stop))
-                # self.__logger.info("transformer -- spikestorate -- reshape buffer -- spikes neurons -- else case: " +str (spikes_neurons[i]))
                 spikes_neurons[i] = SpikeTrain(spikes_neurons[i] * ms,
                                                t_start=np.around(count * self.time_synch, decimals=2),
                                                t_stop=np.around((count + 1) * self.time_synch, decimals=2) + 0.0001)
@@ -235,7 +230,7 @@ class generate_data:
         signal = AnalogSignal(rate * Hz, t_start=(time_step[0] + 0.1) * ms,
                               sampling_period=(time_step[1] - time_step[0]) / rate.shape[-1] * ms)
         spike_generate = []
-        print("rate:",rate,"\nsignal:",signal,"\ntime step:",time_step)
+        # print("rate:",rate,"\nsignal:",signal,"\ntime step:",time_step)
         for i in range(self.nb_spike_generator[0]):
             # generate individual spike trains
             spike_generate.append(np.around(np.sort(inhomogeneous_poisson_process(signal, as_array=True)), decimals=1))

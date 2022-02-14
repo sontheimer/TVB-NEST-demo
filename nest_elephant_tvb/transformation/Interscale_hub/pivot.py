@@ -52,11 +52,9 @@ class NestTvbPivot:
         self.__param = param
         # INTERcommunicator
         if intracomm.Get_rank() == 0:
-            self.__logger.info("NESTtoTVB -- receiver communicator Rank:"+str(comm_receiver.Get_rank()))
             self.__comm_receiver = comm_receiver
             self.__num_sending = self.__comm_receiver.Get_remote_size()
         else:
-            self.__logger.info("NESTtoTVB -- sender communicator Rank:"+str(comm_sender.Get_rank()))
             self.__comm_sender = comm_sender
             self.__num_receiving = self.__comm_sender.Get_remote_size()
 
@@ -103,7 +101,7 @@ class NestTvbPivot:
         count = 0
         status_ = MPI.Status()
         self.__logger.info("reading from buffer")
-        self.__logger.info("NESTtoTVB -- consumer/receiver -- Rank:"+str(self.__comm_receiver.Get_rank()))
+        # self.__logger.info("NESTtoTVB -- consumer/receiver -- Rank:"+str(self.__comm_receiver.Get_rank()))
         while True:
             head_ = 0 # head of the buffer, reset after each iteration            
             # TODO: This is still not correct. We only check for the Tag of the last rank.
@@ -115,7 +113,7 @@ class NestTvbPivot:
             for i in range(1, self.__num_sending):
                 # new: We do not care which source sends first, give MPI the freedom to send in whichever order.
                 # self.__comm_receiver.Recv([check, 1, MPI.CXX_BOOL], source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=status_)
-                self.__logger.info("checking status")
+                # self.__logger.info("checking status")
                 self.__comm_receiver.Recv([check, 1, MPI.CXX_BOOL], source=i, tag=MPI.ANY_TAG, status=status_)
                 if status_rank_0 != status_.Get_tag():
                     raise Exception('Abnormal state : the state of Nest is different between rank')
@@ -127,18 +125,14 @@ class NestTvbPivot:
                     pass
                 for source in range(self.__num_sending):
                     # send 'ready' to the nest rank
-                    self.__logger.info("send ready")
+                    # self.__logger.info("send ready")
                     self.__comm_receiver.Send([np.array(True,dtype='b'),MPI.BOOL],dest=source,tag=0)
                     # receive package size info
-                    self.__logger.info("DEBUG 121 ====> receiving size in NEST_TVB_PIVOT")
-                    #############################
-                    # NOTE upper left arrow hangs here
+                    # self.__logger.info("DEBUG 121 ====> receiving size in NEST_TVB_PIVOT")
                     self.__comm_receiver.Recv([shape, 1, MPI.INT], source=source, tag=0, status=status_)
                     # self.__comm_receiver.Recv([shape, 1, MPI.INT], source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=status_)
                     # NEW: receive directly into the buffer
-                    self.__logger.info("DEBUG 126 ====> receiving package")
                     self.__comm_receiver.Recv([self.__databuffer[head_:], MPI.DOUBLE], source=source, tag=0, status=status_)
-                    self.__logger.info("moving head")
                     head_ += shape[0] # move head 
                 # Mark as 'ready to do analysis'
                 self.__databuffer[-1] = 0
@@ -161,7 +155,7 @@ class NestTvbPivot:
         '''
         count=0 # simulation/iteration step
         status_ = MPI.Status()
-        self.__logger.info("NESTtoTVB -- producer/sender -- Rank:"+str(self.__comm_sender.Get_rank()))
+        # self.__logger.info("NESTtoTVB -- producer/sender -- Rank:"+str(self.__comm_sender.Get_rank()))
         while True:
             # TODO: this communication has the 'rank 0' problem described in the beginning
             accept = False
@@ -177,23 +171,18 @@ class NestTvbPivot:
                     pass
                 # TODO: All science/analysis here. Move to a proper place.
                 times,data = self._transform(count)
-                self.__logger.info("transformation is done")
                 # Mark as 'ready to receive next simulation step'
                 self.__databuffer[-1] = 1
                 
                 ### OLD Code
                 #logger.info("Nest to TVB : send data :"+str(np.sum(data)) )
                 # time of sim step
-                self.__logger.info("sending timestep")
                 self.__comm_sender.Send([times, MPI.DOUBLE], dest=status_.Get_source(), tag=0)
                 # send the size of the rate
-                self.__logger.info("sending size of the rate")
                 size = np.array(int(data.shape[0]),dtype='i')
                 self.__comm_sender.Send([size,MPI.INT], dest=status_.Get_source(), tag=0)
                 # send the rates
-                self.__logger.info("sending the rates")
                 self.__comm_sender.Send([data,MPI.DOUBLE], dest=status_.Get_source(), tag=0)
-                self.__logger.info("sent")
                 ### OLD Code end
             elif status_.Get_tag() == 1:
                 # NOTE: simulation ended
@@ -201,7 +190,6 @@ class NestTvbPivot:
             else:
                 raise Exception("bad mpi tag"+str(status_.Get_tag()))
             count+=1
-        #logger.info('NEST_to_TVB: End of send function')
 
     
     def _transform(self, count):
@@ -213,11 +201,8 @@ class NestTvbPivot:
         '''
         #store: Python object, create the histogram 
         #analyse: Python object, calculate rates
-        self.__logger.info("NESTtoTVBPivot -- transform -- buffer head:"+str(self.__databuffer[-2]))
         spikerate = spiketorate(self.__param)
-        self.__logger.info("NESTtoTVBPivot -- transform -- start spike_to_rate transform")
         times, data = spikerate.spike_to_rate(count, self.__databuffer[-2], self.__databuffer)
-        self.__logger.info("NESTtoTVBPivot -- transform -- end spike_to_rate transform -- times:"+ str(times)+"-- rates:"+str(data))
 
         '''
         store = store_data(self.__param)
@@ -273,10 +258,8 @@ class TvbNestPivot:
         MVP: receive on rank 0, do the rest on rank 1.
         '''
         if intracomm.Get_rank() == 0: # Receiver from input sim, rank 0
-            #self._receive()
             self._send()
         else: #  Science/analyse and sender to TVB, rank 1-x
-            #self._send()
             self._receive()
 
 
@@ -301,11 +284,10 @@ class TvbNestPivot:
         # init placeholder for incoming data
         size = np.empty(1, dtype='i') # size of the rate-array
         status_ = MPI.Status()
-        self.__logger.info("TVBtoNEST -- consumer/receiver -- Rank:"+str(self.__comm_receiver.Get_rank()))
+        # self.__logger.info("TVBtoNEST -- consumer/receiver -- Rank:"+str(self.__comm_receiver.Get_rank()))
         while True:
             # NOTE: Check communication protocol between simulators and transformers!
             requests=[]
-            self.__logger.info("send request in recv()")
             for rank in range(self.__num_sending):
                 requests.append(self.__comm_receiver.isend(True,dest=rank,tag=0))
             MPI.Request.Waitall(requests)
@@ -313,27 +295,21 @@ class TvbNestPivot:
             # we receive from "ANY_SOURCE", but only check the status_ of the last receive...
             # get the starting and ending time of the simulation step
             # NEW: receive directly into the buffer
-            self.__logger.info("receiving times")
-            # self.__comm_receiver.Recv([self.__databuffer[0:], MPI.DOUBLE], source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=status_)
-            self.__comm_receiver.Recv([self.__databuffer[0:], MPI.DOUBLE], source=0, tag=0, status=status_)
+            self.__comm_receiver.Recv([self.__databuffer[0:], MPI.DOUBLE], source=0, tag=MPI.ANY_TAG, status=status_)
             if status_.Get_tag() == 0:
                 # wait until ready to receive new data (i.e. the sender has cleared the buffer)
                 while self.__databuffer[-1] != 1: # TODO: use MPI, remove the sleep
                     time.sleep(0.001)
                     pass
                 # Get the size of the data
-                self.__logger.info("receiving size")
                 self.__comm_receiver.Recv([size, 1, MPI.INT], source=status_.Get_source(), tag=0, status=status_)
                 # NEW: receive directly into the buffer
                 # First two entries are the times, see above
-                self.__logger.info("receiving rate data")
                 self.__comm_receiver.Recv([self.__databuffer[2:], MPI.DOUBLE], source=status_.Get_source(), tag=0, status=status_)
                 # Mark as 'ready to do analysis'
                 self.__databuffer[-1] = 0
                 self.__databuffer[-2] = size # info about size of data array
-                # logger.info(" TVB to Nest: update buffer")
             elif status_.Get_tag() == 1:
-                # logger.info('TVB: simulation ended, waiting for stop command')
                 # NOTE: simulation ended
                 break
             else:
@@ -353,18 +329,12 @@ class TvbNestPivot:
         check = np.empty(1,dtype='b')
         size_list = np.empty(1, dtype='i')
         id_first_spike_detector = self.__param['id_first_spike_detector']
-        self.__logger.info("starting sending in TVB NEST PIVOT")
-        self.__logger.info("TVBtoNEST -- producer/sender -- Rank:"+str(self.__comm_sender.Get_rank()))
         while True:
             # TODO: This is still not correct. We only check for the Tag of the last rank.
             # IF all ranks send always the same tag in one iteration (simulation step)
             # then this works. But it should be handled differently!!!!
             for rank in range(self.__num_receiving):
-                self.__logger.info("DEBUG 335 ====> receiving request")
-                ############################################
-                # NOTE bottom left arrow hangs here
                 self.__comm_sender.Recv([check, 1, MPI.CXX_BOOL], source=rank, tag=MPI.ANY_TAG, status=status_)
-                self.__logger.info("DEBUG 339 ====> receiving request is done")
             if status_.Get_tag() == 0:
                 # wait until the receiver has cleared the buffer, i.e. filled with new data
                 while self.__databuffer[-1] != 0: # TODO: use MPI, remove the sleep
@@ -372,9 +342,7 @@ class TvbNestPivot:
                     pass
 
                 # TODO: All science/generate here. Move to a proper place.
-                self.__logger.info("starting transformation")
                 spikes_times = self._transform()
-                self.__logger.info("transformation is done")
                 # Mark as 'ready to receive next simulation step'
                 self.__databuffer[-1] = 1
                 
@@ -385,12 +353,10 @@ class TvbNestPivot:
                 # a second status_ object is used, should not be named the same
                 for rank in range(self.__num_receiving):
                     # NOTE: hardcoded 10 in simulation mocks
-                    self.__logger.info("receiving size")
                     self.__comm_sender.Recv([size_list, 1, MPI.INT], source=rank, tag=0, status=status_)
                     if size_list[0] != 0:
                         list_id = np.empty(size_list, dtype='i')
                         # NOTE: hardcoded np.arange(0,10,1) in simulation mocks
-                        self.__logger.info("receiving arange")
                         self.__comm_sender.Recv([list_id, size_list, MPI.INT], source=status_.Get_source(), tag=0, status=status_)
                         # Select the good spike train and send it
                         # TODO: create lists, append to lists, nested loops
@@ -402,26 +368,22 @@ class TvbNestPivot:
                             data += [spikes_times[i-id_first_spike_detector]]
                         send_shape = np.array(np.concatenate(([np.sum(shape)],shape)), dtype='i')
                         # firstly send the size of the spikes train
-                        self.__logger.info("sending size of train")
+                        # self.__logger.info("sending size of train")
                         self.__comm_sender.Send([send_shape, MPI.INT], dest=status_.Get_source(), tag=list_id[0])
                         # secondly send the spikes train
                         data = np.concatenate(data).astype('d')
-                        self.__logger.info("sending train")
+                        # self.__logger.info("sending train")
                         self.__comm_sender.Send([data, MPI.DOUBLE], dest=rank, tag=list_id[0])
                 ### OLD code end
             elif  status_.Get_tag() == 1:
                 # NOTE: one sim step? inconsistent with receiving side
-                # logger.info(" TVB to Nest end sending") 
                 continue
             elif status_.Get_tag() == 2:
-                # logger.info(" TVB to Nest end simulation ")
                 # NOTE: simulation ended
                 break
             else:
                 raise Exception("bad mpi tag : "+str(status_.Get_tag()))
         
-        # logger.info('TVB_to_NEST: End of send function')
-
 
     def _transform(self):
         '''
@@ -433,12 +395,10 @@ class TvbNestPivot:
         # time_step are the first two doubles in the buffer
         # rate is a double array, which size is stored in the second to last index
         if int(self.__databuffer[-2]) == 0:
-            self.__logger.info("TVBtoNESTPivot -- transform -- buffer content:"+str(self.__databuffer[2:]))
             spikes_times = generator.generate_spike(0,
                                                 self.__databuffer[:2],
                                                 self.__databuffer[2:])
         else:
-            self.__logger.info("TVBtoNESTPivot -- transform -- buffer content:"+str(self.__databuffer[2:int(self.__databuffer[-2])]))
             spikes_times = generator.generate_spike(0,
                                                 self.__databuffer[:2],
                                                 self.__databuffer[2:int(self.__databuffer[-2])])

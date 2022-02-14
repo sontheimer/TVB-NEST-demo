@@ -114,8 +114,21 @@ class InterscaleHub:
         '''
         self.__logger.info("Stop InterscaleHub and disconnect...")
         self.__pivot.stop()
-        self.__ic.close_and_finalize(self.__input_comm, self.__input_port)
-        self.__ic.close_and_finalize(self.__output_comm, self.__output_port)
+        # time.sleep(5)
+        if self.__direction == 1:
+                if self.__comm.Get_rank() == 0:
+                    self.__ic.close_and_finalize(self.__input_comm, self.__input_port)
+                else:
+                    self.__ic.close_and_finalize(self.__output_comm, self.__output_port)
+
+        elif self.__direction == 2:
+                if self.__comm.Get_rank() == 0:
+                    self.__ic.close_and_finalize(self.__output_comm, self.__output_port)
+                else:
+                    self.__ic.close_and_finalize(self.__input_comm, self.__input_port)
+
+        
+
 
     
     def _create_buffer(self):
